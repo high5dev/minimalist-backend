@@ -1,0 +1,20 @@
+GET http://localhost:3000/minimalist
+
+###
+
+GET http://localhost:3000/minimalist/665632e216303698d41680c6
+
+###
+
+POST http://localhost:3000/minimalist
+Content-Type: application/json
+
+{
+    "name" : "eric",
+    "email": "dr.eric1125@gmail.com",
+    "gender": "male",
+    "age": "from25to30",
+    "pregnancy": "pregnant",
+    "skinType": "normal",
+    "skinSensitivity": "sensitive"
+}

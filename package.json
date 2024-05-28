@@ -1,0 +1,20 @@
+{
+  "name": "minimalist-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "minimalist:server": "nodemon server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Eric",
+  "license": "ISC",
+  "description": "Restfull API for Minimalist",
+  "dependencies": {
+    "express": "^4.19.2",
+    "mongoose": "^8.4.0"
+  },
+  "devDependencies": {
+    "dotenv": "^16.4.5",
+    "nodemon": "^3.1.1"
+  }
+}
