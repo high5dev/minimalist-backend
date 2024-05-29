@@ -71,7 +71,9 @@ router.patch('/:id', getMinimalist, async (req, res)=>{
 //Deleting by ID
 router.delete('/:id', getMinimalist, async (req, res)=>{
     try {
-        await res.minimalist.remove()
+        // console.log(res.minimalist)
+        console.log(minimalist)
+        // await minimalist.remove()
     } catch (err) {
         res.status(500).json({msg: err.message})
     }

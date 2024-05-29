@@ -16,5 +16,10 @@ Content-Type: application/json
     "age": "from25to30",
     "pregnancy": "pregnant",
     "skinType": "normal",
-    "skinSensitivity": "sensitive"
+    "skinSensitivity": "sensitive",    
+    "haut": []
 }
+
+
+####
+DELETE  http://localhost:3000/minimalist/66565d670d917eadc71552a4
