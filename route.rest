@@ -16,8 +16,9 @@ Content-Type: application/json
     "age": "from25to30",
     "pregnancy": "pregnant",
     "skinType": "normal",
-    "skinSensitivity": "sensitive",    
-    "haut": []
+    "skinSensitivity": "sensitive",
+    "imageUri": "http://localhost:3000/images/me-1.jpg",
+    "haut": [{"redness": "123"}, {"uniformness": "123"}, {"pigmentation": "123"}, {"wrinkles": "123"}, {"perceivedAge": "123"}, {"eyeAge": "123"}]
 }
 
 

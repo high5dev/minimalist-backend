@@ -27,6 +27,8 @@ router.post('/', async (req, res)=>{
         pregnancy: req.body.pregnancy,
         skinType: req.body.skinType,
         skinSensitivity: req.body.skinSensitivity,
+        imageUri: req.body.imageUri,
+        haut: req.body.haut
     });
 
     try {
