@@ -22,4 +22,4 @@ Content-Type: application/json
 
 
 ####
-DELETE  http://localhost:3000/minimalist/66565d670d917eadc71552a4
+DELETE  http://localhost:3000/minimalist/665632e216303698d41680c6
