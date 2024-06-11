@@ -20,6 +20,9 @@ const hautAPISchema = new mongoose.Schema({
     image_id: {
         type: String,
     },
+    image_url: {
+        type: String
+    }
 })
 
 
