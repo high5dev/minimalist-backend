@@ -6,15 +6,9 @@ const axios = require('axios');
 const url = 'https://saas.haut.ai/api/v1'
 const hautAPIs = require("../model/haut");
 
-router.post('/test', async (req, res) => {
+router.get('/test', async (req, res) => {
     try {
-        const result = req.body
-        const customerEmail = result?.cutomerInfo?.email
-        if (customerEmail === '') {
-            res.status(400).json({ msg: 'customer Info not provided' })
-        } else {
-            res.json("req")
-        }
+        res.json('test works')
     } catch (err) {
         return res.status(500).json({ msg: err.message })
     }
