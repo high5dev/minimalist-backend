@@ -98,7 +98,7 @@ router.post('/image-upload', async (req, res) => {
 
 
         // const results = await axios.get(`${url}/companies/${company_id}/datasets/${dataset_id}/subjects/${subject_id}/batches/${image_batch_id}/images/${image_id}/results/`, {headers:headers})
-        
+
         // console.log(eye_age_values?.main_metric?.value)
         // console.log(eyes_age_data)
 
@@ -112,33 +112,43 @@ router.post('/image-upload', async (req, res) => {
 router.post('/get-score', async (req, res) => {
     try {
         const reqInfo = req.body
-        console.log(reqInfo)
-        res.json('sdfa')
-        // const results = await axios.get(`${url}/companies/${company_id}/datasets/${dataset_id}/subjects/${subject_id}/batches/${image_batch_id}/images/`, { headers: headers })
-
+        const access_token = reqInfo?.apiData?.access_token
+        const company_id = reqInfo?.apiData?.company_id
+        const dataset_id = reqInfo?.apiData?.dataset_id
+        const subject_id = reqInfo?.apiData?.subject_id
+        const batch_id = reqInfo?.apiData?.batch_id
+        const image_id = reqInfo?.apiData?.image_id
+        const headers = {
+            'Authorization': `Bearer ${access_token}`,
+            'Accept': 'application/json'
+        }
+        // res.json('sdfa')
+        const response = await axios.get(`${url}/companies/${company_id}/datasets/${dataset_id}/subjects/${subject_id}/batches/${batch_id}/images/${image_id}/results/`, { headers })
+        // console.log(response)
+        // res.json(response.data)
         // const data = results?.data;
 
         // console.log(results)
         // // res.json(results)
         // res.json(data)
 
-        // const eyes_age = lodash.find(results, el => el.algorithm_family_tech_name === 'selfie_v2.eyes_age')
-        // const eyes_age_data = eyes_age?.result?.area_results;
-        // const eye_age_values = lodash.find(eyes_age_data, { 'area_name': 'face' })
-        // const eye_age_value = eye_age_values?.main_metric?.value
+        const eyes_age = lodash.find(response, el => el.algorithm_family_tech_name === 'selfie_v2.eyes_age')
+        const eyes_age_data = eyes_age?.result?.area_results;
+        const eye_age_values = lodash.find(eyes_age_data, { 'area_name': 'face' })
+        const eye_age_value = eye_age_values?.main_metric?.value
 
 
-        // const age = lodash.find(results, el => el.algorithm_family_tech_name === 'selfie_v2.age')
-        // const age_data = age?.result?.area_results;
-        // const age_values = lodash.find(age_data, { 'area_name': 'face' })
-        // const age_value = age_values?.main_metric?.value
+        const age = lodash.find(response, el => el.algorithm_family_tech_name === 'selfie_v2.age')
+        const age_data = age?.result?.area_results;
+        const age_values = lodash.find(age_data, { 'area_name': 'face' })
+        const age_value = age_values?.main_metric?.value
 
-        // const skin_tone = lodash.find(results, el => el.algorithm_family_tech_name === 'selfie_v2.skin_tone')
-        // const skin_tone_data = skin_tone?.result?.area_results;
-        // const skin_tone_values = lodash.find(skin_tone_data, { 'area_name': 'face' })
-        // const skin_tone_value = skin_tone_values?.main_metric?.value
+        const skin_tone = lodash.find(response, el => el.algorithm_family_tech_name === 'selfie_v2.skin_tone')
+        const skin_tone_data = skin_tone?.result?.area_results;
+        const skin_tone_values = lodash.find(skin_tone_data, { 'area_name': 'face' })
+        const skin_tone_value = skin_tone_values?.main_metric?.value
     } catch (err) {
-        res.status(500).json({ msg: err.message });        
+        res.status(500).json({ msg: err.message });
     }
 })
 
