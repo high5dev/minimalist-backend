@@ -24,3 +24,8 @@ Content-Type: application/json
 
 ####
 DELETE  http://localhost:3000/minimalist/665632e216303698d41680c6
+
+
+###
+
+GET http://localhost:3000/haut
