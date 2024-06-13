@@ -88,7 +88,7 @@ router.post('/image-upload', async (req, res) => {
 
                     // const base64Data = imageSrc.replace(/^data:image\/jpeg;base64,/, '');
                     // const buffer = Buffer.from(base64Data, 'base64');
-                    // const filePath = path.join(__dirname, '..', 'public', `${customerEmail}.png`);
+                    // const filePath = path.join(__dirname, '..', 'public', `${customerEmail}.jpg`);
 
                     // fs.writeFileSync(filePath, buffer, (err) => {
                     //     if (err) {
