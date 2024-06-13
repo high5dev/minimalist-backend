@@ -55,6 +55,21 @@ const hautSchema = new mongoose.Schema({
 
 }, { _id: false });
 
+const productSchema = new mongoose.Schema({
+    name: {
+        type: String
+    },
+    imageUri: {
+        type: String
+    },
+    whenToUse: {
+        type: String
+    },
+    price: {
+        type: String
+    }
+})
+
 const minimalistSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -89,6 +104,9 @@ const minimalistSchema = new mongoose.Schema({
     },
     haut: {
         type: [hautSchema],
+    },
+    recommendedProducts: {
+        type: [productSchema]
     }
 });
 
