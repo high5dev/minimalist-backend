@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var lodash = require('lodash');
+const fs = require('fs');
 // var request = require('request');
 const axios = require('axios');
 const url = 'https://saas.haut.ai/api/v1'
@@ -84,6 +85,18 @@ router.post('/image-upload', async (req, res) => {
                 if (!scoresRes?.data) {
                     res.json({ is_ok: false })
                 } else {
+
+                    // const base64Data = imageSrc.replace(/^data:image\/jpeg;base64,/, '');
+                    // const buffer = Buffer.from(base64Data, 'base64');
+                    // const filePath = path.join(__dirname, '..', 'public', `${customerEmail}.png`);
+
+                    // fs.writeFileSync(filePath, buffer, (err) => {
+                    //     if (err) {
+                    //         console.error('Failed to save the image:', err);
+                    //         return res.status(500).json({ msg: 'Failed to save the image' });
+                    //     }
+                    // });
+
                     const eyes_age = lodash.find(scoresRes?.data, el => el.algorithm_family_tech_name === 'selfie_v2.eyes_age')
                     const eyes_age_data = eyes_age?.result?.area_results;
                     const eye_age_values = lodash.find(eyes_age_data, { 'area_name': 'face' })
@@ -172,31 +185,13 @@ router.post('/image-upload', async (req, res) => {
 
                     const newMinimalist = await minimalist.save();
                     res.status(201).json(newMinimalist)
-
-                    // const hautScore = new hautScores({
-                    //     age: age_value,
-                    //     acne: acne_value,
-                    //     hydration: hydration_value,
-                    //     pigmentation: pigmentation_value,
-                    //     redness: redness_value,
-                    //     uniformness: uniformness_value,
-                    //     eyeBags: eye_bags_value,
-                    //     eyeAge: eye_age_value,
-                    //     skinTone: skin_tone_value,
-                    //     lines: lines_value,
-                    //     pores: pores_value,
-                    //     translucency: translucency_value
-                    // })
-                    // const newHautScore = await hautScore.save();
-                    // res.status(201).json(newHautScore)
                 }
 
 
             }, 5000)
         }
     } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ error: 'An error occurred while making the external API call' });
+        res.status(500).json({ msg: error.message });
     }
 })
 
