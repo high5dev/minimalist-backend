@@ -12,9 +12,78 @@ router.get('/', async (req, res)=> {
         res.status(500).json({msg: err.message})
     }
 })
+
 //Retriving by ID
 router.get('/:id', getMinimalist, (req, res)=>{
     res.send(res.minimalist)
+})
+
+// Getting within a date range
+router.get('/date-range', async (req, res)=> {
+    try{
+        let afterDate = new Date(req.body.afterDate)
+        let beforeDate = new Date(req.body.beforeDate)
+        let responseArray = []
+        const minimalist = await Minimalist.find()
+
+        for (let i = 0; i < minimalist.length; i++) {
+
+            let tempTimeStamp = minimalist[i].id.toString().substring(0,8)
+            let tempDate = new Date( parseInt( tempTimeStamp, 16 ) * 1000 )
+
+            if (tempDate > afterDate && tempDate < beforeDate) {
+                responseArray.push(minimalist[i])
+            }
+        }
+
+        res.json(responseArray)
+
+    } catch (err) {
+        res.status(500).json({msg: err.message})
+    }
+})
+
+//Retriving by email
+router.post('/email', async (req, res)=>{
+    let emailAddress = req.body.email
+    let responseArray = []
+    try{
+        const minimalist = await Minimalist.find()
+        for (let i = 0; i < minimalist.length; i++) {
+            let tempEmail = `${minimalist[i].email}`
+            if (tempEmail === emailAddress) {
+                responseArray.push(minimalist[i])
+            }
+        }
+        res.json(responseArray)
+    } catch (err) {
+        res.status(500).json({msg: err.message})
+    }
+})
+
+// Getting by email and date range
+router.post('/email-date-range', async (req, res)=>{
+    let afterDate = new Date(req.body.afterDate)
+    let beforeDate = new Date(req.body.beforeDate)
+    let emailAddress = req.body.email
+    let responseArray = []
+    try{
+        const minimalist = await Minimalist.find()
+        for (let i = 0; i < minimalist.length; i++) {
+            let tempEmail = `${minimalist[i].email}`
+            if (tempEmail === emailAddress) {
+                let tempTimeStamp = minimalist[i].id.toString().substring(0,8)
+                let tempDate = new Date( parseInt( tempTimeStamp, 16 ) * 1000 )
+    
+                if (tempDate > afterDate && tempDate < beforeDate) {
+                    responseArray.push(minimalist[i])
+                }
+            }
+        }
+        res.json(responseArray)
+    } catch (err) {
+        res.status(500).json({msg: err.message})
+    }
 })
 
 //Creating a collection
