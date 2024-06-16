@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var lodash = require('lodash');
+const path = require('path'); // Import the path module
 const fs = require('fs');
 // var request = require('request');
 const axios = require('axios');
@@ -52,7 +53,6 @@ router.post('/image-upload', async (req, res) => {
             }
 
             const subjects = await axios.get(`${url}/companies/${company_id}/datasets/${dataset_id}/subjects/`, { headers: headers })
-            // const arr_subject = lodash.filter(subjects?.data, x=>x.name === email)
             const subject = lodash.find(subjects?.data?.results, { 'name': customerEmail });
 
             let subject_id = null
@@ -73,7 +73,6 @@ router.post('/image-upload', async (req, res) => {
                 }, { headers: headers });
             const image_id = images?.data?.id
             const image_batch_id = images?.data?.image_batch_id
-            const image_url = images?.data?.urls?.original
 
             if (!image_id && image_batch_id) {
                 res.json({ is_ok: false })
@@ -86,16 +85,18 @@ router.post('/image-upload', async (req, res) => {
                     res.json({ is_ok: false })
                 } else {
 
-                    // const base64Data = imageSrc.replace(/^data:image\/jpeg;base64,/, '');
-                    // const buffer = Buffer.from(base64Data, 'base64');
-                    // const filePath = path.join(__dirname, '..', 'public', `${customerEmail}.jpg`);
+                    const base64Data = image_src.replace(/^data:image\/jpeg;base64,/, '');
+                    const buffer = Buffer.from(base64Data, 'base64');
+                    const filePath = path.join(__dirname, '..', 'public', 'images', `${image_id}.jpg`);
 
-                    // fs.writeFileSync(filePath, buffer, (err) => {
-                    //     if (err) {
-                    //         console.error('Failed to save the image:', err);
-                    //         return res.status(500).json({ msg: 'Failed to save the image' });
-                    //     }
-                    // });
+                    fs.writeFileSync(filePath, buffer, (err) => {
+                        if (err) {
+                            console.error('Failed to save the image:', err);
+                            return res.status(500).json({ msg: 'Failed to save the image' });
+                        }
+                    });
+
+                    const imageUrl = `${req.protocol}://${req.get('host')}/images/${image_id}.jpg`;
 
                     const eyes_age = lodash.find(scoresRes?.data, el => el.algorithm_family_tech_name === 'selfie_v2.eyes_age')
                     const eyes_age_data = eyes_age?.result?.area_results;
@@ -166,7 +167,7 @@ router.post('/image-upload', async (req, res) => {
                         skinType: reqInfo?.cutomerInfo?.skinType,
                         skinSensitivity: reqInfo?.cutomerInfo?.skinSensitivity,
                         pregnancy: reqInfo?.cutomerInfo?.skinSensitivity,
-                        imageUri: image_url,
+                        imageUri: imageUrl,
                         haut: [{
                             perceivedAge: age_value,
                             acne: acne_value,
