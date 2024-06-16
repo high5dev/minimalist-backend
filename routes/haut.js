@@ -80,11 +80,12 @@ router.post('/image-upload', async (req, res) => {
 
             setTimeout(async () => {
                 const scoresRes = await axios.get(`${url}/companies/${company_id}/datasets/${dataset_id}/subjects/${subject_id}/batches/${image_batch_id}/images/${image_id}/results/`, { headers })
-
-                if (!scoresRes?.data) {
-                    res.json({ is_ok: false })
+                const errorObject = lodash.find(scoresRes?.data, el => el.result?.error === 'No face detected');
+                if (!scoresRes?.data || scoresRes.data.length === 0) {
+                    return res.status(404).json({ msg: 'No results found' });
+                } else if (errorObject && lodash.get(errorObject, 'result.error', '') === 'No face detected') {
+                    return res.status(400).json({ msg: 'No face detected' });
                 } else {
-
                     const base64Data = image_src.replace(/^data:image\/jpeg;base64,/, '');
                     const buffer = Buffer.from(base64Data, 'base64');
                     const filePath = path.join(__dirname, '..', 'public', 'images', `${image_id}.jpg`);
