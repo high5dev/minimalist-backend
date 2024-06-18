@@ -19,7 +19,7 @@ router.get('/:id', getMinimalist, (req, res)=>{
 })
 
 // Getting within a date range
-router.get('/date-range', async (req, res)=> {
+router.post('/date-range', async (req, res)=> {
     try{
         let afterDate = new Date(req.body.afterDate)
         let beforeDate = new Date(req.body.beforeDate)
