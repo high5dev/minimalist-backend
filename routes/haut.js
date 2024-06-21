@@ -1,201 +1,140 @@
-var express = require('express');
-var router = express.Router();
-var lodash = require('lodash');
-const path = require('path'); // Import the path module
+const express = require('express');
+const router = express.Router();
+const lodash = require('lodash');
+const path = require('path');
 const fs = require('fs');
-// var request = require('request');
 const axios = require('axios');
-const url = 'https://saas.haut.ai/api/v1'
-const Minimalist = require("../model/minimalist");
-const hautScores = require("../model/scores")
+const Minimalist = require('../model/minimalist');
+const hautScores = require('../model/scores');
+
+const url = 'https://saas.haut.ai/api/v1';
+const credentials = {
+    username: "gaurav.singh@beminimalist.co",
+    password: "Minimalist@4321"
+};
 
 router.get('/test', async (req, res) => {
     try {
-        res.json('test works')
+        res.json('test works');
     } catch (err) {
-        return res.status(500).json({ msg: err.message })
+        res.status(500).json({ msg: err.message });
     }
-})
+});
 
 router.post('/image-upload', async (req, res) => {
     try {
-        const reqInfo = req.body
-        const customerEmail = reqInfo?.cutomerInfo?.email
-        const image_src = reqInfo?.imgSrc
-        if (customerEmail === '') {
-            res.status(400).json({ msg: 'customer Info not provided' })
-        } else {
-            const response = await axios.post(`${url}/login/`,
-                {
-                    username: "gaurav.singh@beminimalist.co",
-                    password: "Minimalist@4321"
-                },
-                {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-            const token = response?.data?.access_token;
-            if (!token) {
-                res.json({ is_ok: false })
-            }
-            const company_id = response?.data?.company_id;
-            const headers = {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
+        const reqInfo = req.body;
+        const customerEmail = reqInfo?.cutomerInfo?.email;
+        const image_src = reqInfo?.imgSrc;
 
-            const datasets = await axios.get(`${url}/companies/${company_id}/datasets/short_list/?q=minimalist`, { headers: headers });
-            const dataset = lodash.find(datasets?.data, { 'name': 'minimalist' });
-            const dataset_id = dataset?.id
-            if (!dataset_id) {
-                res.json({ is_ok: false })
-            }
-
-            const subjects = await axios.get(`${url}/companies/${company_id}/datasets/${dataset_id}/subjects/`, { headers: headers })
-            const subject = lodash.find(subjects?.data?.results, { 'name': customerEmail });
-
-            let subject_id = null
-            if (subject?.id) {
-                subject_id = subject?.id
-            } else {
-                const new_subject = await axios.post(`${url}/companies/${company_id}/datasets/${dataset_id}/subjects/`, { name: customerEmail }, { headers: headers })
-                subject_id = new_subject?.data?.id
-            }
-            if (!subject_id) {
-                res.json({ is_ok: false })
-            }
-            const images = await axios.post(`${url}/companies/${company_id}/datasets/${dataset_id}/subjects/${subject_id}/images/`,
-                {
-                    "side_id": 1,
-                    "light_id": 1,
-                    "b64data": image_src,
-                }, { headers: headers });
-            const image_id = images?.data?.id
-            const image_batch_id = images?.data?.image_batch_id
-
-            if (!image_id && image_batch_id) {
-                res.json({ is_ok: false })
-            }
-
-            setTimeout(async () => {
-                const scoresRes = await axios.get(`${url}/companies/${company_id}/datasets/${dataset_id}/subjects/${subject_id}/batches/${image_batch_id}/images/${image_id}/results/`, { headers })
-                const errorObject = lodash.find(scoresRes?.data, el => el.result?.error === 'No face detected');
-                if (!scoresRes?.data || scoresRes.data.length === 0) {
-                    return res.status(404).json({ msg: 'No results found' });
-                } else if (errorObject && lodash.get(errorObject, 'result.error', '') === 'No face detected') {
-                    return res.status(400).json({ msg: 'No face detected' });
-                } else {
-                    const base64Data = image_src.replace(/^data:image\/jpeg;base64,/, '');
-                    const buffer = Buffer.from(base64Data, 'base64');
-                    const filePath = path.join(__dirname, '..', 'public', 'images', `${image_id}.jpg`);
-
-                    fs.writeFileSync(filePath, buffer, (err) => {
-                        if (err) {
-                            console.error('Failed to save the image:', err);
-                            return res.status(500).json({ msg: 'Failed to save the image' });
-                        }
-                    });
-
-                    const imageUrl = `${req.protocol}://${req.get('host')}/images/${image_id}.jpg`;
-
-                    const eyes_age = lodash.find(scoresRes?.data, el => el.algorithm_family_tech_name === 'selfie_v2.eyes_age')
-                    const eyes_age_data = eyes_age?.result?.area_results;
-                    const eye_age_values = lodash.find(eyes_age_data, { 'area_name': 'face' })
-                    const eye_age_value = eye_age_values?.main_metric?.value
-
-
-                    const age = lodash.find(scoresRes?.data, el => el.algorithm_family_tech_name === 'selfie_v2.age')
-                    const age_data = age?.result?.area_results;
-                    const age_values = lodash.find(age_data, { 'area_name': 'face' })
-                    const age_value = age_values?.main_metric?.value
-
-                    const skin_tone = lodash.find(scoresRes?.data, el => el.algorithm_family_tech_name === 'selfie_v2.skin_tone')
-                    const skin_tone_data = skin_tone?.result?.area_results;
-                    const skin_tone_values = lodash.find(skin_tone_data, { 'area_name': 'face' })
-                    const skin_tone_value = skin_tone_values?.main_metric?.value
-
-                    const acne = lodash.find(scoresRes?.data, el => el.algorithm_family_tech_name === 'selfie_v2.acne')
-                    const acne_data = acne?.result?.area_results;
-                    const acne_values = lodash.find(acne_data, { 'area_name': 'face' })
-                    const acne_value = acne_values?.main_metric?.value
-
-                    const pigmentation = lodash.find(scoresRes?.data, el => el.algorithm_family_tech_name === 'selfie_v2.pigmentation')
-                    const pigmentation_data = pigmentation?.result?.area_results;
-                    const pigmentation_values = lodash.find(pigmentation_data, { 'area_name': 'face' })
-                    const pigmentation_value = pigmentation_values?.main_metric?.value
-
-                    const hydration = lodash.find(scoresRes?.data, el => el.algorithm_family_tech_name === 'selfie_v2.hydration')
-                    const hydration_data = hydration?.result?.area_results;
-                    const hydration_values = lodash.find(hydration_data, { 'area_name': 'face' })
-                    const hydration_value = hydration_values?.main_metric?.value
-
-                    const redness = lodash.find(scoresRes?.data, el => el.algorithm_family_tech_name === 'selfie_v2.redness')
-                    const redness_data = redness?.result?.area_results;
-                    const redness_values = lodash.find(redness_data, { 'area_name': 'face' })
-                    const redness_value = redness_values?.main_metric?.value
-
-                    const uniformness = lodash.find(scoresRes?.data, el => el.algorithm_family_tech_name === 'selfie_v2.uniformness')
-                    const uniformness_data = uniformness?.result?.area_results;
-                    const uniformness_values = lodash.find(uniformness_data, { 'area_name': 'face' })
-                    const uniformness_value = uniformness_values?.main_metric?.value
-
-                    const lines = lodash.find(scoresRes?.data, el => el.algorithm_family_tech_name === 'selfie_v2.lines')
-                    const lines_data = lines?.result?.area_results;
-                    const lines_values = lodash.find(lines_data, { 'area_name': 'face' })
-                    const lines_value = lines_values?.main_metric?.value
-
-                    const pores = lodash.find(scoresRes?.data, el => el.algorithm_family_tech_name === 'selfie_v2.pores')
-                    const pores_data = pores?.result?.area_results;
-                    const pores_values = lodash.find(pores_data, { 'area_name': 'face' })
-                    const pores_value = pores_values?.main_metric?.value
-
-                    const eye_bags = lodash.find(scoresRes?.data, el => el.algorithm_family_tech_name === 'selfie_v2.eye_bags')
-                    const eye_bags_data = eye_bags?.result?.area_results;
-                    const eye_bags_values = lodash.find(eye_bags_data, { 'area_name': 'face' })
-                    const eye_bags_value = eye_bags_values?.main_metric?.value
-
-                    const translucency = lodash.find(scoresRes?.data, el => el.algorithm_family_tech_name === 'selfie_v2.translucency')
-                    const translucency_data = translucency?.result?.area_results;
-                    const translucency_values = lodash.find(translucency_data, { 'area_name': 'face' })
-                    const translucency_value = translucency_values?.main_metric?.value
-
-                    const minimalist = new Minimalist({
-                        name: reqInfo?.cutomerInfo?.name,
-                        email: customerEmail,
-                        gender: reqInfo?.cutomerInfo?.gender,
-                        age: reqInfo?.cutomerInfo?.age,
-                        skinType: reqInfo?.cutomerInfo?.skinType,
-                        skinSensitivity: reqInfo?.cutomerInfo?.skinSensitivity,
-                        pregnancy: reqInfo?.cutomerInfo?.skinSensitivity,
-                        imageUri: imageUrl,
-                        haut: [{
-                            perceivedAge: age_value,
-                            acne: acne_value,
-                            hydration: hydration_value,
-                            pigmentation: pigmentation_value,
-                            redness: redness_value,
-                            uniformness: uniformness_value,
-                            eyeBags: eye_bags_value,
-                            eyeAge: eye_age_value,
-                            skinTone: skin_tone_value,
-                            lines: lines_value,
-                            pores: pores_value,
-                            translucency: translucency_value
-                        }]
-                    })
-
-                    const newMinimalist = await minimalist.save();
-                    res.status(201).json(newMinimalist)
-                }
-
-
-            }, 5000)
+        if (!customerEmail) {
+            return res.status(400).json({ msg: 'customer Info not provided' });
         }
+
+        const response = await axios.post(`${url}/login/`, credentials, { headers: { 'Content-Type': 'application/json' } });
+        const token = response?.data?.access_token;
+        const company_id = response?.data?.company_id;
+
+        if (!token) return res.json({ is_ok: false });
+
+        const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+        const datasets = await axios.get(`${url}/companies/${company_id}/datasets/short_list/?q=minimalist`, { headers });
+        const dataset = lodash.find(datasets?.data, { 'name': 'minimalist' });
+        const dataset_id = dataset?.id;
+
+        if (!dataset_id) return res.json({ is_ok: false });
+
+        const subjects = await axios.get(`${url}/companies/${company_id}/datasets/${dataset_id}/subjects/`, { headers });
+        let subject = lodash.find(subjects?.data?.results, { 'name': customerEmail });
+
+        if (!subject) {
+            const new_subject = await axios.post(`${url}/companies/${company_id}/datasets/${dataset_id}/subjects/`, { name: customerEmail }, { headers });
+            subject = new_subject?.data;
+        }
+
+        const subject_id = subject?.id;
+
+        if (!subject_id) return res.json({ is_ok: false });
+
+        const images = await axios.post(`${url}/companies/${company_id}/datasets/${dataset_id}/subjects/${subject_id}/images/`, { "side_id": 1, "light_id": 1, "b64data": image_src }, { headers });
+        const image_id = images?.data?.id;
+        const image_batch_id = images?.data?.image_batch_id;
+
+        if (!image_id && image_batch_id) return res.json({ is_ok: false });
+
+        setTimeout(async () => {
+            const scoresRes = await axios.get(`${url}/companies/${company_id}/datasets/${dataset_id}/subjects/${subject_id}/batches/${image_batch_id}/images/${image_id}/results/`, { headers });
+
+            if (!scoresRes?.data || scoresRes.data.length === 0) {
+                return res.status(404).json({ msg: 'No results found' });
+            }
+
+            const noFaceError = lodash.find(scoresRes.data, el => el.result?.error === 'No face detected');
+            if (noFaceError) {
+                return res.status(400).json({ msg: 'No face detected' });
+            }
+
+            const notFullFaceError = lodash.find(scoresRes.data, el => el.result?.error === 'Not full face');
+            if (notFullFaceError) {
+                return res.status(400).json({ msg: 'Not full face' });
+            }
+
+            const saveImage = (base64Data, filePath) => {
+                const buffer = Buffer.from(base64Data.replace(/^data:image\/jpeg;base64,/, ''), 'base64');
+                fs.writeFileSync(filePath, buffer);
+            };
+
+            const filePath = path.join(__dirname, '..', 'public', 'images', `${image_id}.jpg`);
+            saveImage(image_src, filePath);
+
+            const imageUrl = `${req.protocol}://${req.get('host')}/images/${image_id}.jpg`;
+
+            const extractMetric = (data, techName, areaName) => {
+                const item = lodash.find(data, el => el.algorithm_family_tech_name === techName);
+                const area = lodash.find(item?.result?.area_results, { 'area_name': areaName });
+                return area?.main_metric?.value;
+            };
+
+            const metrics = {
+                perceivedAge: extractMetric(scoresRes.data, 'selfie_v2.age', 'face'),
+                acne: extractMetric(scoresRes.data, 'selfie_v2.acne', 'face'),
+                hydration: extractMetric(scoresRes.data, 'selfie_v2.hydration', 'face'),
+                pigmentation: extractMetric(scoresRes.data, 'selfie_v2.pigmentation', 'face'),
+                redness: extractMetric(scoresRes.data, 'selfie_v2.redness', 'face'),
+                uniformness: extractMetric(scoresRes.data, 'selfie_v2.uniformness', 'face'),
+                eyeBags: extractMetric(scoresRes.data, 'selfie_v2.eye_bags', 'face'),
+                eyeAge: extractMetric(scoresRes.data, 'selfie_v2.eyes_age', 'face'),
+                skinTone: extractMetric(scoresRes.data, 'selfie_v2.skin_tone', 'face'),
+                lines: extractMetric(scoresRes.data, 'selfie_v2.lines', 'face'),
+                pores: extractMetric(scoresRes.data, 'selfie_v2.pores', 'face'),
+                translucency: extractMetric(scoresRes.data, 'selfie_v2.translucency', 'face')
+            };
+
+            // Get the 2 lowest values in metrics
+            const metricValues = Object.values(metrics).sort((a, b) => a - b);
+            const lowestValue = metricValues[0];
+            const secondLowestValue = metricValues[1];
+            console.log('Lowest value:', lowestValue);
+            console.log('Second lowest value:', secondLowestValue);
+
+            const minimalist = new Minimalist({
+                name: reqInfo?.cutomerInfo?.name,
+                email: customerEmail,
+                gender: reqInfo?.cutomerInfo?.gender,
+                age: reqInfo?.cutomerInfo?.age,
+                skinType: reqInfo?.cutomerInfo?.skinType,
+                skinSensitivity: reqInfo?.cutomerInfo?.skinSensitivity,
+                pregnancy: reqInfo?.cutomerInfo?.skinSensitivity,
+                imageUri: imageUrl,
+                haut: [metrics]
+            });
+
+            const newMinimalist = await minimalist.save();
+            res.status(201).json(newMinimalist);
+        }, 5000);
     } catch (error) {
-        // console.log(error)
         res.status(500).json({ msg: error.message });
     }
-})
+});
 
-module.exports = router
+module.exports = router;
