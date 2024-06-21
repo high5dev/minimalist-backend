@@ -111,11 +111,13 @@ router.post('/image-upload', async (req, res) => {
             };
 
             // Get the 2 lowest values in metrics
-            const metricValues = Object.values(metrics).sort((a, b) => a - b);
-            const lowestValue = metricValues[0];
-            const secondLowestValue = metricValues[1];
-            console.log('Lowest value:', lowestValue);
-            console.log('Second lowest value:', secondLowestValue);
+            const metricEntries = Object.entries(metrics);
+            metricEntries.sort((a, b) => a[1] - b[1]);
+            const [lowestMetric, secondLowestMetric] = metricEntries.slice(0, 2);
+            metrics.lowestMetric = { [lowestMetric[0]]: lowestMetric[1] };
+            metrics.secondLowestMetric = { [secondLowestMetric[0]]: secondLowestMetric[1] };
+
+            console.log(metrics)
 
             const minimalist = new Minimalist({
                 name: reqInfo?.cutomerInfo?.name,

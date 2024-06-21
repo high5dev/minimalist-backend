@@ -52,6 +52,8 @@ const hautSchema = new mongoose.Schema({
     facialLandmarks: {
         type: String,
     },
+    lowestMetric: { type: Object },
+    secondLowestMetric: { type: Object },
 
 }, { _id: false });
 
