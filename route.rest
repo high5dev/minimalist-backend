@@ -29,3 +29,23 @@ DELETE  http://localhost:3000/minimalist/665632e216303698d41680c6
 ###
 
 GET http://localhost:3000/haut
+
+###
+
+
+POST http://localhost:3000/minimalist/products
+Content-Type: application/json
+
+{
+    "metric": "acne",
+    "metric_level": "high",
+    "gender": "male",
+    "pregnancy": "no",
+    "skin_type": "dry",
+    "skin_sensitivity": "yes",
+    "products": {
+      "cleanser": "Oat Extract 06% Gentle Cleanser",
+      "moisturizer": "Sepicalm 03% Moisturizer",
+      "sunscreen": "SPF 50 Sunscreen"
+    }
+  }

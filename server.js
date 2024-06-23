@@ -23,7 +23,9 @@ app.use(express.json());
 app.use(cors());
 const minimalistRouter = require('./routes/minimalist')
 const hautRouter = require('./routes/haut')
+const recommendationRouter = require('./routes/recommendation')
 app.use('/minimalist', minimalistRouter)
+app.use('/recommendation', recommendationRouter)
 app.use('/haut', hautRouter)
 app.use(express.static(path.join(__dirname, 'public')));
 app.listen('3000', '0.0.0.0', ()=> console.log('app started'+ process.env.DB_URL));

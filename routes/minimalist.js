@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router();
 const Minimalist = require("../model/minimalist");
-const minimalist = require('../model/minimalist');
+const Recommendations = require("../model/recommendations");
 
 //Getting all
 router.get('/', async (req, res)=> {
@@ -18,6 +18,39 @@ router.get('/:id', getMinimalist, (req, res)=>{
     res.send(res.minimalist)
 })
 
+
+router.post('/recommendations', async(req, res) => {
+    const minimalist = await Minimalist.findById(req.body.id)
+    const { gender, pregnancy, skinType, skinSensitivity } = minimalist;
+})
+
+router.post('/products', async(req, res) => {
+    const recommendation = new Recommendations({
+        gender: req.body.gender,
+        skin_type: req.body.skin_type,
+        skin_sensitivity: req.body.skin_sensitivity,
+        pregnancy: req.body.pregnancy,
+        products: req.body.products,
+        metric: req.body.metric,
+        metric_leve: req.body.metric_leve
+    });
+    try {
+        const newRecommendation = await recommendation.save();
+        res.status(201).json(newRecommendation);
+    } catch (err) {
+        res.status(400).json({msg: err.message})
+    }
+})
+
+
+router.get('/products', async(req, res) => {
+    try{
+        const recommendation = await Recommendations.find()
+        res.json(recommendation)
+    } catch (err) {
+        res.status(500).json({msg: err.message})
+    }
+})
 // Getting within a date range
 router.post('/date-range', async (req, res)=> {
     try{
