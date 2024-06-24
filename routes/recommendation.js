@@ -3,9 +3,15 @@ const router = express.Router();
 const Minimalist = require("../model/minimalist");
 const Recommendations = require("../model/recommendations");
 
-router.post('/recommendations', async(req, res) => {
-    const minimalist = await Minimalist.findById(req.body.id)
-    const { gender, pregnancy, skinType, skinSensitivity } = minimalist;
+router.post('/', async(req, res) => {
+    const { gender, pregnancy, skinType, skinSensitivity } = await Minimalist.findById(req.body.id);
+    console.log(gender, pregnancy)
+})
+
+router.get('/', async(req, res) => {
+    const recommendation = await Recommendations.find();
+    // const { gender, pregnancy, skinType, skinSensitivity } = minimalist;
+    res.status(201).json(recommendation);
 })
 
 router.post('/', async(req, res) => {
