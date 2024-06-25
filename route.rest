@@ -47,7 +47,7 @@ Content-Type: application/json
     "skin_type": "Dry",
     "skin_sensitivity": "Yes",
     "metric": "acne",
-    "metric_level": "High (A)\n\nOptimal\n\n(8,10]"
+    "metric_level": "High"
 }
 
 

@@ -19,9 +19,17 @@ router.post('/', async(req, res) => {
           if (!recommendation) {
             return res.status(404).json({ message: 'No recommendation found' });
           }
+
+          const product = {
+            Cleanser: recommendation.cleanser,
+            Toner: recommendation.toner,
+            Treatment: recommendation.treatment,
+            Moisturizer: recommendation.moisturizer,
+            Sunscreen: recommendation.sunscreen
+          }
       
           // Send the recommendation as a response
-          res.json(recommendation);        
+          res.json(product);        
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });
