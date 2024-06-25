@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router();
 const Minimalist = require("../model/minimalist");
 const Recommendations = require("../model/recommendations");
+const Product = require("../model/products");
 
 router.post('/', async(req, res) => {
     try {
@@ -20,12 +21,32 @@ router.post('/', async(req, res) => {
             return res.status(404).json({ message: 'No recommendation found' });
           }
 
+          const cleanser = await Product.find({
+            title: recommendation[0].cleanser
+          })
+
+          const toner = await Product.find({
+            title: recommendation[0].toner
+          })
+
+          const treatment = await Product.find({
+            title: recommendation[0].treatment
+          })
+
+          const moisturizer = await Product.find({
+            title: recommendation[0].moisturizer
+          })
+
+          const sunscreen = await Product.find({
+            title: recommendation[0].sunscreen
+          })
+
           const product = {
-            Cleanser: recommendation[0].cleanser,
-            Toner: recommendation[0].toner,
-            Treatment: recommendation[0].treatment,
-            Moisturizer: recommendation[0].moisturizer,
-            Sunscreen: recommendation[0].sunscreen
+            Cleanser: cleanser,
+            Toner: toner,
+            Treatment: treatment,
+            Moisturizer: moisturizer,
+            Sunscreen: sunscreen
           }
       
           // Send the recommendation as a response
