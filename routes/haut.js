@@ -5,7 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const axios = require('axios');
 const Minimalist = require('../model/minimalist');
-const hautScores = require('../model/scores');
+const Recommendations = require("../model/recommendations");
 
 const url = 'https://saas.haut.ai/api/v1';
 const credentials = {
@@ -92,32 +92,65 @@ router.post('/image-upload', async (req, res) => {
             const extractMetric = (data, techName, areaName) => {
                 const item = lodash.find(data, el => el.algorithm_family_tech_name === techName);
                 const area = lodash.find(item?.result?.area_results, { 'area_name': areaName });
+                if (techName === "selfie_v2.eye_bags") {
+                    const item = lodash.find(area?.sub_metrics, el => el.tech_name === "dark_circles_score");
+                    return item.value
+                } 
                 return area?.main_metric?.value;
             };
 
             const metrics = {
-                perceivedAge: extractMetric(scoresRes.data, 'selfie_v2.age', 'face'),
                 acne: extractMetric(scoresRes.data, 'selfie_v2.acne', 'face'),
                 hydration: extractMetric(scoresRes.data, 'selfie_v2.hydration', 'face'),
                 pigmentation: extractMetric(scoresRes.data, 'selfie_v2.pigmentation', 'face'),
                 redness: extractMetric(scoresRes.data, 'selfie_v2.redness', 'face'),
                 uniformness: extractMetric(scoresRes.data, 'selfie_v2.uniformness', 'face'),
-                eyeBags: extractMetric(scoresRes.data, 'selfie_v2.eye_bags', 'face'),
-                eyeAge: extractMetric(scoresRes.data, 'selfie_v2.eyes_age', 'face'),
+                darkCircle: extractMetric(scoresRes.data, 'selfie_v2.eye_bags', 'face'),
                 skinTone: extractMetric(scoresRes.data, 'selfie_v2.skin_tone', 'face'),
                 lines: extractMetric(scoresRes.data, 'selfie_v2.lines', 'face'),
                 pores: extractMetric(scoresRes.data, 'selfie_v2.pores', 'face'),
-                translucency: extractMetric(scoresRes.data, 'selfie_v2.translucency', 'face')
+                // translucency: extractMetric(scoresRes.data, 'selfie_v2.translucency', 'face')
             };
 
             // Get the 2 lowest values in metrics
             const metricEntries = Object.entries(metrics);
             metricEntries.sort((a, b) => a[1] - b[1]);
             const [lowestMetric, secondLowestMetric] = metricEntries.slice(0, 2);
-            metrics.lowestMetric = { [lowestMetric[0]]: lowestMetric[1] };
-            metrics.secondLowestMetric = { [secondLowestMetric[0]]: secondLowestMetric[1] };
 
-            console.log(metrics)
+            const categorizing_metric = (metricKey, score) => {
+                let level = ''
+                switch(metricKey) {
+                    case "acne":
+                      // code block
+                      break;
+                    case "pigmentation":
+                      // code block
+                      break;
+                    case "uniformness":
+                    // code block
+                      break;
+                    case "pores":
+                    // code block
+                      break;
+                    case "redness":
+                    // code block
+                      break;
+                    case "skinTone":
+                    // code block
+                      break;
+                    case "lines":
+                      // code block
+                      break;
+                    case "hydration":
+                    // code block
+                      break;
+                    case "darkCircle":
+                    // code block
+                      break;
+                    default:
+                      // code block
+                  }
+            };
 
             const minimalist = new Minimalist({
                 name: reqInfo?.cutomerInfo?.name,
@@ -128,7 +161,21 @@ router.post('/image-upload', async (req, res) => {
                 skinSensitivity: reqInfo?.cutomerInfo?.skinSensitivity,
                 pregnancy: reqInfo?.cutomerInfo?.skinSensitivity,
                 imageUri: imageUrl,
-                haut: [metrics]
+                haut: [{
+                    perceivedAge : extractMetric(scoresRes.data, 'selfie_v2.age', 'face'),
+                    eyeAge: extractMetric(scoresRes.data, 'selfie_v2.eyes_age', 'face'),
+                    acne: extractMetric(scoresRes.data, 'selfie_v2.acne', 'face'),
+                    hydration: extractMetric(scoresRes.data, 'selfie_v2.hydration', 'face'),
+                    pigmentation: extractMetric(scoresRes.data, 'selfie_v2.pigmentation', 'face'),
+                    redness: extractMetric(scoresRes.data, 'selfie_v2.redness', 'face'),
+                    uniformness: extractMetric(scoresRes.data, 'selfie_v2.uniformness', 'face'),
+                    darkCircle: extractMetric(scoresRes.data, 'selfie_v2.eye_bags', 'face'),
+                    skinTone: extractMetric(scoresRes.data, 'selfie_v2.skin_tone', 'face'),
+                    lines: extractMetric(scoresRes.data, 'selfie_v2.lines', 'face'),
+                    pores: extractMetric(scoresRes.data, 'selfie_v2.pores', 'face'),
+                    lowestMetric: { [lowestMetric[0]]: lowestMetric[1] },
+                    secondLowestMetric: { [secondLowestMetric[0]]: secondLowestMetric[1] }
+                }]
             });
 
             const newMinimalist = await minimalist.save();

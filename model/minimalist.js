@@ -31,9 +31,6 @@ const hautSchema = new mongoose.Schema({
     pores: {
         type: String,
     },
-    darkCircles: {
-        type: String,
-    },
     lacrimaGroove: {
         type: String,
     },
@@ -47,6 +44,9 @@ const hautSchema = new mongoose.Schema({
         type: String,
     },
     hydration: {
+        type: String,
+    },
+    darkCircle: {
         type: String,
     },
     facialLandmarks: {

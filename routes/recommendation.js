@@ -4,8 +4,28 @@ const Minimalist = require("../model/minimalist");
 const Recommendations = require("../model/recommendations");
 
 router.post('/', async(req, res) => {
-    const { gender, pregnancy, skinType, skinSensitivity } = await Minimalist.findById(req.body.id);
-    console.log(gender, pregnancy)
+    try {
+        // const { gender, pregnancy, skin_type, skin_sensitivity, metric, metric_level } = await Minimalist.findById(req.body);
+        const { gender, pregnancy, skin_type, skin_sensitivity, metric, metric_level } = req.body;
+        const recommendation = await Recommendations.find({
+            metric: metric,
+            metric_level: metric_level,
+            gender: gender,
+            pregnancy: pregnancy,
+            skin_type: skin_type,
+            skin_sensitivity: skin_sensitivity
+          });
+          console.log(recommendation);
+          if (!recommendation) {
+            return res.status(404).json({ message: 'No recommendation found' });
+          }
+      
+          // Send the recommendation as a response
+          res.json(recommendation);        
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
 })
 
 router.get('/', async(req, res) => {

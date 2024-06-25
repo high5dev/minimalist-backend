@@ -41,7 +41,7 @@ const hautScoreSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    translucency: {
+    darkCircle: {
         type: String,
         required: true
     },
