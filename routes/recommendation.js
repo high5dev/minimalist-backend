@@ -15,17 +15,17 @@ router.post('/', async(req, res) => {
             skin_type: skin_type,
             skin_sensitivity: skin_sensitivity
           });
-          console.log(recommendation);
+          console.log(recommendation[0].cleanser);
           if (!recommendation) {
             return res.status(404).json({ message: 'No recommendation found' });
           }
 
           const product = {
-            Cleanser: recommendation.cleanser,
-            Toner: recommendation.toner,
-            Treatment: recommendation.treatment,
-            Moisturizer: recommendation.moisturizer,
-            Sunscreen: recommendation.sunscreen
+            Cleanser: recommendation[0].cleanser,
+            Toner: recommendation[0].toner,
+            Treatment: recommendation[0].treatment,
+            Moisturizer: recommendation[0].moisturizer,
+            Sunscreen: recommendation[0].sunscreen
           }
       
           // Send the recommendation as a response
