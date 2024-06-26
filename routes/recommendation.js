@@ -31,61 +31,26 @@ router.post('/', async (req, res) => {
     if (!primaryRecommendation && !secondaryRecommendation) {
       return res.status(404).json({ message: 'No recommendation found' });
     }
-
-    const primaryCleanser = await Product.find({
-      title: primaryRecommendation[0].cleanser
-    })
-
-    const primaryToner = await Product.find({
-      title: primaryRecommendation[0].toner
-    })
-
-    const primaryTreatment = await Product.find({
-      title: primaryRecommendation[0].treatment
-    })
-
-    const primaryMoisturizer = await Product.find({
-      title: primaryRecommendation[0].moisturizer
-    })
-
-    const primarySunscreen = await Product.find({
-      title: primaryRecommendation[0].sunscreen
-    })    
-
-    const secondaryCleanser = await Product.find({
-      title: secondaryRecommendation[0].cleanser
-    })
-
-    const secondaryToner = await Product.find({
-      title: secondaryRecommendation[0].toner
-    })
-
-    const secondaryTreatment = await Product.find({
-      title: secondaryRecommendation[0].treatment
-    })
-
-    const secondaryMoisturizer = await Product.find({
-      title: secondaryRecommendation[0].moisturizer
-    })
-
-    const secondarySunscreen = await Product.find({
-      title: secondaryRecommendation[0].sunscreen
-    })
+    
+    const fetchProduct = async (title) => {
+      if (!title) return null;
+      return await Product.find({ title });
+    };
 
     const primaryProduct = {
-      Cleanser: primaryCleanser,
-      Toner: primaryToner,
-      Treatment: primaryTreatment,
-      Moisturizer: primaryMoisturizer,
-      Sunscreen: primarySunscreen
+      Cleanser: await fetchProduct(primaryRecommendation[0]?.cleanser),
+      Toner: await fetchProduct(primaryRecommendation[0]?.toner),
+      Treatment: await fetchProduct(primaryRecommendation[0]?.treatment),
+      Moisturizer: await fetchProduct(primaryRecommendation[0]?.moisturizer),
+      Sunscreen: await fetchProduct(primaryRecommendation[0]?.sunscreen),
     }    
 
     const secondaryProduct = {
-      Cleanser: secondaryCleanser,
-      Toner: secondaryToner,
-      Treatment: secondaryTreatment,
-      Moisturizer: secondaryMoisturizer,
-      Sunscreen: secondarySunscreen
+      Cleanser: await fetchProduct(secondaryRecommendation[0]?.cleanser),
+      Toner: await fetchProduct(secondaryRecommendation[0]?.toner),
+      Treatment: await fetchProduct(secondaryRecommendation[0]?.treatment),
+      Moisturizer: await fetchProduct(secondaryRecommendation[0]?.moisturizer),
+      Sunscreen: await fetchProduct(secondaryRecommendation[0]?.sunscreen),
     }
 
     // Send the recommendation as a response
