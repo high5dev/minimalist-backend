@@ -42,12 +42,12 @@ POST http://localhost:3000/recommendation
 Content-Type: application/json
 
 {
-    "gender": "Male",
+    "gender": "Female",
     "pregnancy": "No",
-    "skin_type": "Dry",
-    "skin_sensitivity": "Yes",
-    "metric": "acne",
-    "metric_level": "High"
+    "skin_type": "combination",
+    "skin_sensitivity": "No",
+    "primary_concern": [{"acne": "Bad"}],
+    "secondary_concern": [{"pigmentation": "Poor"}]
 }
 
 
