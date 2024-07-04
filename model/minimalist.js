@@ -58,7 +58,7 @@ const hautSchema = new mongoose.Schema({
 }, { _id: false });
 
 const productSchema = new mongoose.Schema({
-    name: {
+    title: {
         type: String
     },
     imageUri: {
@@ -72,8 +72,22 @@ const productSchema = new mongoose.Schema({
     },
     productType: {
         type: String
+    },
+    handle: {
+        type: String
+    },
+    status: {
+        type: String
     }
-})
+}, { _id: false })
+
+const recommendedProductSchema = new mongoose.Schema({
+    Cleanser: { type: [productSchema] },
+    Toner: { type: [productSchema] },
+    Treatment: { type: [productSchema] },
+    Moisturizer: { type: [productSchema] },
+    Sunscreen: { type: [productSchema] }
+}, { _id: false })
 
 const minimalistSchema = new mongoose.Schema({
     name: {
@@ -110,8 +124,11 @@ const minimalistSchema = new mongoose.Schema({
     haut: {
         type: [hautSchema],
     },
-    recommendedProducts: {
-        type: [productSchema]
+    primaryConcernProduct: {
+        type: recommendedProductSchema
+    },
+    secondaryConcerProduct: {
+        type: recommendedProductSchema
     }
 });
 

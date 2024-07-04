@@ -6,6 +6,7 @@ const fs = require('fs');
 const axios = require('axios');
 const Minimalist = require('../model/minimalist');
 const Recommendations = require("../model/recommendations");
+const Product = require("../model/products");
 
 const url = 'https://saas.haut.ai/api/v1';
 const credentials = {
@@ -95,7 +96,7 @@ router.post('/image-upload', async (req, res) => {
                 if (techName === "selfie_v2.eye_bags") {
                     const item = lodash.find(area?.sub_metrics, el => el.tech_name === "dark_circles_score");
                     return item.value
-                } 
+                }
                 return area?.main_metric?.value;
             };
 
@@ -117,40 +118,175 @@ router.post('/image-upload', async (req, res) => {
             metricEntries.sort((a, b) => a[1] - b[1]);
             const [lowestMetric, secondLowestMetric] = metricEntries.slice(0, 2);
 
-            const categorizing_metric = (metricKey, score) => {
+            const get_level_from_score = (metricKey, score) => {
                 let level = ''
-                switch(metricKey) {
+                switch (metricKey) {
                     case "acne":
-                      // code block
-                      break;
+                        if (score > 90 && score <= 100) {
+                            level = 'High'
+                        } else if (score > 70 && score <= 90) {
+                            level = 'Medium'
+                        } else if (score > 30 && score <= 71) {
+                            level = 'Poor'
+                        } else if (score >= 0 && score <= 30) {
+                            level = 'Bad'
+                        }
+                        break;
                     case "pigmentation":
-                      // code block
-                      break;
+                        if (score > 90 && score <= 100) {
+                            level = 'High'
+                        } else if (score > 70 && score <= 90) {
+                            level = 'Medium'
+                        } else if (score > 30 && score <= 71) {
+                            level = 'Poor'
+                        } else if (score >= 0 && score <= 30) {
+                            level = 'Bad'
+                        }
+                        break;
                     case "uniformness":
-                    // code block
-                      break;
+                        if (score > 90 && score <= 100) {
+                            level = 'High'
+                        } else if (score > 70 && score <= 90) {
+                            level = 'Medium'
+                        } else if (score > 30 && score <= 71) {
+                            level = 'Poor'
+                        } else if (score >= 0 && score <= 30) {
+                            level = 'Bad'
+                        }
+                        break;
                     case "pores":
-                    // code block
-                      break;
+                        if (score > 90 && score <= 100) {
+                            level = 'High'
+                        } else if (score > 70 && score <= 90) {
+                            level = 'Medium'
+                        } else if (score > 30 && score <= 70) {
+                            level = 'Poor'
+                        } else if (score >= 0 && score <= 30) {
+                            level = 'Bad'
+                        }
+                        break;
                     case "redness":
-                    // code block
-                      break;
+                        if (score > 80 && score <= 100) {
+                            level = 'High'
+                        } else if (score > 60 && score <= 80) {
+                            level = 'Medium'
+                        } else if (score > 40 && score <= 60) {
+                            level = 'Poor'
+                        } else if (score >= 0 && score <= 40) {
+                            level = 'Bad'
+                        }
+                        break;
                     case "skinTone":
-                    // code block
-                      break;
+                        if (score > 60 && score <= 90) {
+                            level = 'High';
+                        } else if (score > 30 && score <= 60) {
+                            level = 'Medium';
+                        } else if (score > -29 && score <= 30) {
+                            level = 'Poor';
+                        } else if (score >= -90 && score <= -30) {
+                            level = 'Bad';
+                        }
+                        break;
                     case "lines":
-                      // code block
-                      break;
+                        if (score > 95 && score <= 100) {
+                            level = 'High'
+                        } else if (score > 90 && score <= 95) {
+                            level = 'Medium'
+                        } else if (score > 80 && score <= 90) {
+                            level = 'Poor'
+                        } else if (score >= 0 && score <= 80) {
+                            level = 'Bad'
+                        }
+                        break;
                     case "hydration":
-                    // code block
-                      break;
+                        if (score > 90 && score <= 100) {
+                            level = 'High'
+                        } else if (score > 70 && score <= 90) {
+                            level = 'Medium'
+                        } else if (score > 30 && score <= 70) {
+                            level = 'Poor'
+                        } else if (score >= 0 && score <= 30) {
+                            level = 'Bad'
+                        }
+                        break;
                     case "darkCircle":
-                    // code block
-                      break;
+                        if (score > 90 && score <= 100) {
+                            level = 'High'
+                        } else if (score > 70 && score <= 90) {
+                            level = 'Medium'
+                        } else if (score > 55 && score <= 70) {
+                            level = 'Poor'
+                        } else if (score >= 0 && score <= 55) {
+                            level = 'Bad'
+                        }
+                        break;
                     default:
-                      // code block
-                  }
+                    // code block
+                }
+                return level;
             };
+
+            const primaryRecommendation = await Recommendations.find({
+                metric: lowestMetric[0],
+                metric_level: get_level_from_score(lowestMetric[0], lowestMetric[1]),
+                gender: reqInfo?.cutomerInfo?.gender,
+                pregnancy: reqInfo?.cutomerInfo?.pregnancy,
+                skin_type: reqInfo?.cutomerInfo?.skinType,
+                skin_sensitivity: reqInfo?.cutomerInfo?.skinSensitivity
+            });
+
+            const secondaryRecommendation = await Recommendations.find({
+                metric: secondLowestMetric[0],
+                metric_level: get_level_from_score(secondLowestMetric[0], secondLowestMetric[1]),
+                gender: reqInfo?.cutomerInfo?.gender,
+                pregnancy: reqInfo?.cutomerInfo?.pregnancy,
+                skin_type: reqInfo?.cutomerInfo?.skinType,
+                skin_sensitivity: reqInfo?.cutomerInfo?.skinSensitivity
+            });
+
+            const fetchProduct = async (title) => {
+                if (!title) return null;
+                return await Product.find({ title });
+            };
+
+            const primaryProduct = {
+                Cleanser: await fetchProduct(primaryRecommendation[0]?.cleanser),
+                Toner: await fetchProduct(primaryRecommendation[0]?.toner),
+                Treatment: await fetchProduct(primaryRecommendation[0]?.treatment),
+                Moisturizer: await fetchProduct(primaryRecommendation[0]?.moisturizer),
+                Sunscreen: await fetchProduct(primaryRecommendation[0]?.sunscreen),
+            }
+
+            const secondaryProduct = {
+                Cleanser: await fetchProduct(secondaryRecommendation[0]?.cleanser),
+                Toner: await fetchProduct(secondaryRecommendation[0]?.toner),
+                Treatment: await fetchProduct(secondaryRecommendation[0]?.treatment),
+                Moisturizer: await fetchProduct(secondaryRecommendation[0]?.moisturizer),
+                Sunscreen: await fetchProduct(secondaryRecommendation[0]?.sunscreen),
+            }
+
+            const appendBaseUrlToImageUri = (productArray) => {
+                if (Array.isArray(productArray)) {
+                    productArray.forEach(product => {
+                        if (product && product.imageUri) {
+                            product.imageUri = `${req.protocol}://${req.get('host')}/images/${product.imageUri}`;
+                        }
+                    });
+                }
+            };
+
+            // Update the imageUri for primary and secondary products
+            appendBaseUrlToImageUri(primaryProduct.Cleanser);
+            appendBaseUrlToImageUri(primaryProduct.Toner);
+            appendBaseUrlToImageUri(primaryProduct.Treatment);
+            appendBaseUrlToImageUri(primaryProduct.Moisturizer);
+            appendBaseUrlToImageUri(primaryProduct.Sunscreen);
+
+            appendBaseUrlToImageUri(secondaryProduct.Cleanser);
+            appendBaseUrlToImageUri(secondaryProduct.Toner);
+            appendBaseUrlToImageUri(secondaryProduct.Treatment);
+            appendBaseUrlToImageUri(secondaryProduct.Moisturizer);
+            appendBaseUrlToImageUri(secondaryProduct.Sunscreen);
 
             const minimalist = new Minimalist({
                 name: reqInfo?.cutomerInfo?.name,
@@ -159,10 +295,10 @@ router.post('/image-upload', async (req, res) => {
                 age: reqInfo?.cutomerInfo?.age,
                 skinType: reqInfo?.cutomerInfo?.skinType,
                 skinSensitivity: reqInfo?.cutomerInfo?.skinSensitivity,
-                pregnancy: reqInfo?.cutomerInfo?.skinSensitivity,
+                pregnancy: reqInfo?.cutomerInfo?.pregnancy,
                 imageUri: imageUrl,
                 haut: [{
-                    perceivedAge : extractMetric(scoresRes.data, 'selfie_v2.age', 'face'),
+                    perceivedAge: extractMetric(scoresRes.data, 'selfie_v2.age', 'face'),
                     eyeAge: extractMetric(scoresRes.data, 'selfie_v2.eyes_age', 'face'),
                     acne: extractMetric(scoresRes.data, 'selfie_v2.acne', 'face'),
                     hydration: extractMetric(scoresRes.data, 'selfie_v2.hydration', 'face'),
@@ -174,8 +310,10 @@ router.post('/image-upload', async (req, res) => {
                     lines: extractMetric(scoresRes.data, 'selfie_v2.lines', 'face'),
                     pores: extractMetric(scoresRes.data, 'selfie_v2.pores', 'face'),
                     lowestMetric: { [lowestMetric[0]]: lowestMetric[1] },
-                    secondLowestMetric: { [secondLowestMetric[0]]: secondLowestMetric[1] }
-                }]
+                    secondLowestMetric: { [secondLowestMetric[0]]: secondLowestMetric[1] },
+                }],
+                primaryConcernProduct: primaryProduct,
+                secondaryConcerProduct: secondaryProduct
             });
 
             const newMinimalist = await minimalist.save();
