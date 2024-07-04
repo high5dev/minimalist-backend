@@ -127,7 +127,7 @@ const minimalistSchema = new mongoose.Schema({
     primaryConcernProduct: {
         type: recommendedProductSchema
     },
-    secondaryConcerProduct: {
+    secondaryConcernProduct: {
         type: recommendedProductSchema
     }
 });

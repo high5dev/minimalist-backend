@@ -313,7 +313,7 @@ router.post('/image-upload', async (req, res) => {
                     secondLowestMetric: { [secondLowestMetric[0]]: secondLowestMetric[1] },
                 }],
                 primaryConcernProduct: primaryProduct,
-                secondaryConcerProduct: secondaryProduct
+                secondaryConcernProduct: secondaryProduct
             });
 
             const newMinimalist = await minimalist.save();
